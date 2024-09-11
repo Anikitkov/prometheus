@@ -1,61 +1,66 @@
 #!/bin/bash
-sudo wget https://github.com/prometheus/prometheus/releases/download/v2.54.1/prometheus-2.54.1.linux-amd64.tar.gz
-sudo tar -xvzf prometheus*.tar.gz
-sudo rm prometheus*.tar.gz
-sudo groupadd --system prometheus
-sudo useradd -s /sbin/nologin --system -g prometheus prometheus
-sudo cp -r prometheus* prometheus
-sudo mv prometheus/prometheus /usr/local/bin/
-sudo mv prometheus/promtool /usr/local/bin/
-sudo chown prometheus:prometheus /usr/local/bin/prometheus
-sudo chown prometheus:prometheus /usr/local/bin/promtool
+sudo wget https://github.com/prometheus/prometheus/releases/download/v2.54.1/prometheus-2.54.1.linux-amd64.tar.gz -P /tmp
+sudo wget https://github.com/prometheus/alertmanager/releases/download/v0.27.0/alertmanager-0.27.0.linux-amd64.tar.gz -P /tmp
+sudo wget https://github.com/prometheus/node_exporter/releases/download/v1.8.2/node_exporter-1.8.2.linux-amd64.tar.gz -P /tmp
+sudo tar -xvzf /tmp/prometheus*.tar.gz -C /tmp/
+sudo tar -xvzf /tmp/alertmanager*.tar.gz -C /tmp/
+sudo tar -xvzf /tmp/node_exporter*.tar.gz -C /tmp/
+sudo useradd --no-create-home --shell /bin/false prometheus
 sudo mkdir /etc/prometheus
 sudo mkdir /var/lib/prometheus
-sudo mv prometheus/consoles/ /etc/prometheus/
-sudo mv prometheus/console_libraries/ /etc/prometheus/
-sudo mv prometheus/prometheus.yml /etc/prometheus/
-sudo chown prometheus:prometheus /etc/prometheus
-sudo chown -R prometheus:prometheus /etc/prometheus/consoles
-sudo chown -R prometheus:prometheus /etc/prometheus/console_libraries
-sudo chown -R prometheus:prometheus /var/lib/prometheus
-sudo mv /etc/prometheus/prometheus.yml /etc/prometheus/prometheus.bak
-sudo touch /etc/prometheus/prometheus.yml
-sudo chmod 777 /etc/prometheus/prometheus.yml
-cat >> /etc/prometheus/prometheus.yml <<EOF
-global:
-  scrape_interval: 15s # интервал сбора и очистки данных с целей
-  evaluation_interval: 15s #  интервал вычисления правил сбора
-    #rule_files:
-    # - "first.rules"
-    # - "second.rules"
-scrape_configs:
-  - job_name: prometheus # имя задания, которое будет собирать данные
-    static_configs: # целевые адреса целей в рамках указанного задания
-      - targets: ['localhost:9090']
-EOF
-promtool check config /etc/prometheus/prometheus.yml
-sudo touch /etc/systemd/system/prometheus.service
-sudo chmod 777 /etc/systemd/system/prometheus.service
+chown -R prometheus:prometheus /etc/prometheus /var/lib/prometheus
+sudo cp /tmp/prometheus*/promtool /usr/local/bin/
+sudo cp /tmp/prometheus*/prometheus /usr/local/bin/
+sudo cp -r /tmp/prometheus*/console_libraries  /etc/prometheus/
+sudo cp  /tmp/prometheus*/prometheus.yml  /etc/prometheus/
+sudo chown prometheus:prometheus /usr/local/bin/{prometheus,promtool}
 sudo cat >> /etc/systemd/system/prometheus.service <<EOF
 [Unit]
-Description=Background service of Prometheus
-Wants=network-online.target
-After=network-online.target
+Description=Prometheus Service
+Documentation=https://prometheus.io/docs/introduction/overview/
+After=network.target
 
 [Service]
 User=prometheus
 Group=prometheus
 Type=simple
 ExecStart=/usr/local/bin/prometheus \
-        --config.file /etc/prometheus/prometheus.yml \
-        --storage.tsdb.path /var/lib/prometheus/ \
-        --web.console.templates=/etc/prometheus/consoles \
-        --web.console.libraries=/etc/prometheus/console_libraries
+ --config.file /etc/prometheus/prometheus.yml \
+ --storage.tsdb.path /var/lib/prometheus/ \
+ --web.console.templates=/etc/prometheus/consoles \
+ --web.console.libraries=/etc/prometheus/console_libraries
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
 
-[Install]
-WantedBy=multi-user.target
-EOF
-sudo systemctl daemon-reload
-sudo systemctl enable prometheus
-sudo systemctl start prometheus
-sudo systemctl status prometheus
+ [Install]
+ WantedBy=multi-user.target
+ EOF
+promtool check config /etc/prometheus/prometheus.yml
+systemctl enable prometheus
+systemctl start prometheus
+                          
+#install alertmanager
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
