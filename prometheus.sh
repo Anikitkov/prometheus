@@ -32,9 +32,9 @@ ExecStart=/usr/local/bin/prometheus \
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=on-failure
 
- [Install]
- WantedBy=multi-user.target
- EOF
+[Install]
+WantedBy=multi-user.target
+EOF
 promtool check config /etc/prometheus/prometheus.yml
 systemctl enable prometheus
 systemctl start prometheus
