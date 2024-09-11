@@ -14,7 +14,10 @@ sudo cp /tmp/prometheus*/prometheus /usr/local/bin/
 sudo cp -r /tmp/prometheus*/console_libraries  /etc/prometheus/
 sudo cp  /tmp/prometheus*/prometheus.yml  /etc/prometheus/
 sudo chown prometheus:prometheus /usr/local/bin/{prometheus,promtool}
-sudo cat >> /etc/systemd/system/prometheus.service <<EOF
+sudo touch /etc/systemd/system/prometheus.service 
+sudo chmod 777 /etc/systemd/system/prometheus.service
+
+sudo cat > /etc/systemd/system/prometheus.service <<EOF
 [Unit]
 Description=Prometheus Service
 Documentation=https://prometheus.io/docs/introduction/overview/
