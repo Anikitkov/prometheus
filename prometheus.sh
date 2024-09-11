@@ -8,7 +8,7 @@ sudo tar -xvzf /tmp/node_exporter*.tar.gz -C /tmp/
 sudo useradd --no-create-home --shell /bin/false prometheus
 sudo mkdir /etc/prometheus
 sudo mkdir /var/lib/prometheus
-chown -R prometheus:prometheus /etc/prometheus /var/lib/prometheus
+sudo chown -R prometheus:prometheus /etc/prometheus /var/lib/prometheus
 sudo cp /tmp/prometheus*/promtool /usr/local/bin/
 sudo cp /tmp/prometheus*/prometheus /usr/local/bin/
 sudo cp -r /tmp/prometheus*/console_libraries  /etc/prometheus/
